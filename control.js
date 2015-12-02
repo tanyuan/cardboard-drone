@@ -7,7 +7,7 @@ function init() {
     document.getElementById("doEvent").innerHTML = "DeviceOrientation";
     // Listen for the deviceorientation event and handle the raw data
     window.addEventListener('deviceorientation', function(eventData) {
-      count++;
+      count += 1;
       // gamma is the left-to-right tilt in degrees, where right is positive
       var tiltLR = eventData.gamma;
       
@@ -19,7 +19,9 @@ function init() {
       
       // call our orientation event handler
       deviceOrientationHandler(tiltLR, tiltFB, dir);
-      calculateAction(tiltLR, tiltFB, dir);
+      if (count%100 == 0) {
+        calculateAction(tiltLR, tiltFB, dir);
+      }
       }, false);
   } else {
     document.getElementById("doEvent").innerHTML = "Not supported on your device or browser.  Sorry."
@@ -39,11 +41,18 @@ function deviceOrientationHandler(tiltLR, tiltFB, dir) {
 }
 
 function calculateAction(tiltLR, tiltFB, dir) {
+  document.getElementById("doTime").innerHTML = count;
+  // Turn left
   if (dir - last_dir > 10) {
-    document.getElementById("doAction").innerHTML = "Turn Left";
+    document.getElementById("doAction").innerHTML = "<<<<<<";
   }
+  // Turn right
+  else if (dir - last_dir < 10) {
+    document.getElementById("doAction").innerHTML = ">>>>>>";
+  }
+  // No action
   else {
-    document.getElementById("doAction").innerHTML = "Nothing";
+    document.getElementById("doAction").innerHTML = "------";
   }
   last_dir = dir;
 }
