@@ -56,7 +56,7 @@ function calculateAction(tiltLR, tiltFB, dir) {
     document.getElementById("doAction").innerHTML = "<<<<<<";
   }
   // Turn right
-  else if (dir - last_dir < 10) {
+  else if (dir - last_dir < -10) {
     document.getElementById("doAction").innerHTML = ">>>>>>";
   }
   // No action
