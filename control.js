@@ -19,7 +19,7 @@ function init() {
       
       // call our orientation event handler
       deviceOrientationHandler(tiltLR, tiltFB, dir);
-      if (count%100 == 0) {
+      if (count%10 == 0) {
         calculateAction(tiltLR, tiltFB, dir);
       }
       }, false);
@@ -42,8 +42,17 @@ function deviceOrientationHandler(tiltLR, tiltFB, dir) {
 
 function calculateAction(tiltLR, tiltFB, dir) {
   document.getElementById("doTime").innerHTML = count;
+  // Exception degree
+  // Turn left: from 360 to +0
+  if (dir - last_dir < -350) {
+    document.getElementById("doAction").innerHTML = "<<<<<<+";
+  }
+  // Turn right: from +0 to 360
+  else if (dir - last_dir > 350) {
+    document.getElementById("doAction").innerHTML = ">>>>>>+";
+  }
   // Turn left
-  if (dir - last_dir > 10) {
+  else if (dir - last_dir > 10) {
     document.getElementById("doAction").innerHTML = "<<<<<<";
   }
   // Turn right
