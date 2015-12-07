@@ -1,3 +1,4 @@
+// Track phone orientation
 init();
 var count = 0;
 var last_dir = 0;
@@ -28,6 +29,7 @@ function init() {
   }
 }
 
+// Show device orientation numbers and image in HTML
 function deviceOrientationHandler(tiltLR, tiltFB, dir) {
   document.getElementById("doTiltLR").innerHTML = Math.round(tiltLR);
   document.getElementById("doTiltFB").innerHTML = Math.round(tiltFB);
@@ -40,6 +42,7 @@ function deviceOrientationHandler(tiltLR, tiltFB, dir) {
   logo.style.transform = "rotate("+ tiltLR +"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";
 }
 
+// Calculate head action by device orientation
 function calculateAction(tiltLR, tiltFB, dir) {
   document.getElementById("doTime").innerHTML = count;
   // Exception degree
@@ -63,6 +66,7 @@ function calculateAction(tiltLR, tiltFB, dir) {
   else {
     document.getElementById("doAction").innerHTML = "------";
   }
+  // Store this direction for comparing
   last_dir = dir;
 }
 
