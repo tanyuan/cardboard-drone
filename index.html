@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=1280">
+    <title>DroneVR</title>
+	<script src="/dronestream/nodecopter-client.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="js_lib/jquery.min.js" ></script>
+	<script src="js_lib/hammer.js" ></script>
+	<script src="js_lib/jquery.easyModal.js"></script>
+	
+	<script src="js_ours/our_hammer.js" ></script>
+	<script src="js_ours/our_cardBrdSnr.js" ></script>
+	<script src="js_ours/our_drone.js"></script>
+	<script src="js_ours/our_fullScreen.js" ></script>
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<div id="canvasContainer" class="myContainer">
+		<div id="dummyLeft" class="canvasClass dummyClass"></div><div id="dummyRight" class="canvasClass dummyClass"></div>
+		<div id="droneStreamLeft" class="canvasClass" style=""></div>
+		<div id="droneStreamRight" class="canvasClass" style="">
+			<canvas width="640" height="360" style="background-color: rgb(51, 51, 51);"></canvas>
+		</div>
+		<div id="our_hammerLeft" class="canvasClass" style="">
+			<img id="powerLeft" src="landing.ico" height="50" width="50" style=""/>
+		</div>
+		<div id="our_hammerRight" class="canvasClass" style="">
+			<img id="powerRight" src="landing.ico" height="50" width="50" style=""/>
+		</div>
+		
+		<div class="easy-modal" id="checkTakeoff">
+			<div align="center">Are you sure to takeoff?</div>
+			<div align="center"><button onclick="takeoff();$('#checkTakeoff').trigger('closeModal');">確定</button>&nbsp;&nbsp;<button onclick="$('#checkTakeoff').trigger('closeModal');">取消</button></div>
+		</div>
+		
+		<div class="easy-modal" id="checkLand">
+			<div align="center">Are you sure to land?</div>
+			<div align="center"><button onclick="land();$('#checkLand').trigger('closeModal');">確定</button>&nbsp;&nbsp;<button onclick="$('#checkLand').trigger('closeModal');">取消</button></div>
+		</div>
+		
+		<div class="easy-modal" id="message">
+			<div align="center" id="message_content"></div>
+			<div align="center"><button onclick="$('#message').trigger('closeModal');">確定</button></div>
+		</div>
+	</div>
+	<div class="myContainer">	
+		<!--Remove below <!-- and -->
+		<!--to enable test buttons and debug info-->
+		<button onclick="stopInAir();">停止動作</button>&nbsp;&nbsp;
+		<button onclick="$('#checkTakeoff').trigger('openModal');">起飛</button>&nbsp;&nbsp;
+		<button onclick="$('#checkLand').trigger('openModal');">降落</button>&nbsp;&nbsp;
+		<button onclick="moveUp(0.6);">上</button>&nbsp;&nbsp;
+		<button onclick="moveDown(0.6);">下</button>&nbsp;&nbsp;
+		<button onclick="moveLeft(0.3);">左</button>&nbsp;&nbsp;
+		<button onclick="moveRight(0.3);">右</button>&nbsp;&nbsp;
+		<button onclick="moveFront(0.6);">前</button>&nbsp;&nbsp;
+		<button onclick="moveBack(0.6);">後</button>&nbsp;&nbsp;
+		<button onclick="rotateClockwise(0.3);">順旋</button>&nbsp;&nbsp;
+		<button onclick="rotateCounterClockwise(0.3);">逆旋</button>&nbsp;&nbsp;
+		<button onclick="fullscreen();">全螢</button>&nbsp;&nbsp;
+	
+		<div class="main">
+			<h2>Device Orientation</h2>
+			<table>
+				<tr>
+					<td>Event Supported</td>
+					<td id="doEvent"></td>
+				</tr>
+				<tr>
+					<td>Tilt Left/Right [gamma]</td>
+					<td id="doTiltLR"></td>
+				</tr>
+				<tr>
+					<td>Tilt Front/Back [beta]</td>
+					<td id="doTiltFB"></td>
+				</tr>
+				<tr>
+					<td>Direction [alpha]</td>
+					<td id="doDirection"></td>
+				</tr>
+				<tr>
+					<td>Action</td>
+					<td id="doAction"></td>
+				</tr>
+				<tr>
+					<td>Time</td>
+					<td id="doTime"></td>
+				</tr>
+			</table>
+			<div class="container" style="-webkit-perspective: 300; perspective: 300;">
+				<img src="html5_logo.png" id="imgLogo" class="logo">
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" charset="utf-8">
+	$( document ).ready( function() {
+		initDroneCtrl();
+		initCardBoardSensor();
+		initFullScreen();
+	});
+</script>
+</html>

@@ -1,0 +1,98 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.main {
+  /*display: none;*/
+  border: 1px solid black;
+  box-shadow: 10px 10px 5px #888;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #ddd;
+  margin: 25px;
+  width: 450px;
+  margin-left:auto;
+  margin-right:auto;  
+}
+
+.logo {
+  width:275px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  padding: 15px;
+}
+
+.container {
+  /*display: none;*/
+  -webkit-perspective: 300; perspective: 300;
+}
+
+#viewer {
+    display: inline;
+    width:100%;
+    min-height:100%;
+}
+
+#left-view, #right-view {
+    background-image: url("example-photo.jpg");
+    background-size: cover;
+    background-position-x: center;
+    position: absolute;
+    min-height: 100%;
+    width: 50%;
+}
+#left-view {
+    /* border: 1px solid black; */
+    top: 0;
+    left: 0;
+}
+#right-view {
+    /* border: 1px solid red; */
+    top: 0;
+    right: 0;
+}
+
+.myContainer{
+	text-align: center;
+}
+
+.easy-modal{
+	width: 400px;
+	padding: 0.5em;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.35);
+	background-color: white;
+}
+
+.canvasClass{
+	width: 640px;
+	height: 360px;
+}
+
+.dummyClass{
+	display:inline-block;
+	margin: 0px;
+}
+
+#canvasContainer:-moz-full-screen {
+    width: 1280px;
+	height: 280px;
+}
+
+#canvasContainer:-webkit-full-screen {
+	width: 1280px;
+	height: 280px;
+}
+
+#canvasContainer:-ms-fullscreen {
+    width: 1280px;
+	height: 280px;
+}
+
+#canvasContainer:fullscreen {
+	width: 1280px;
+	height: 280px;
+}
+
+
