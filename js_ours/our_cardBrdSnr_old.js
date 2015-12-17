@@ -1,16 +1,11 @@
 // Track phone orientation
 var count;
 var last_dir;
-var stopAction;
-var rotateStatus;
 
 function initCardBoardSensor() {
   count=0;
   last_dir=0;
   isStopping=false;
-  stopAction=null;//manage the status of stopping action
-  rotateStatus=0;//0 for not rotating, 1 rotating CounterClockwise, -1 rotating Clockwise
-  
   if (window.DeviceOrientationEvent) {
     document.getElementById("doEvent").innerHTML = "DeviceOrientation";
     // Listen for the deviceorientation event and handle the raw data
@@ -56,75 +51,30 @@ function calculateAction(tiltLR, tiltFB, dir) {
   // Turn left: from 360 to +0
   if (dir - last_dir < -350) {
     document.getElementById("doAction").innerHTML = "<<<<<<+";
-	rotate(1);
+	rotateCounterClockwise(0.3);
   }
   // Turn right: from +0 to 360
   else if (dir - last_dir > 350) {
     document.getElementById("doAction").innerHTML = ">>>>>>+";
-	rotate(-1);
+	rotateClockwise(0.3);
   }
   // Turn left
-  else if (dir - last_dir > 5) {
+  else if (dir - last_dir > 3) {
     document.getElementById("doAction").innerHTML = "<<<<<<";
-	rotate(1);
+	rotateCounterClockwise(0.3);
   }
   // Turn right
-  else if (dir - last_dir < -5) {
+  else if (dir - last_dir < -3) {
     document.getElementById("doAction").innerHTML = ">>>>>>";
-	rotate(-1);
+	rotateClockwise(0.3);
   }
   // No action
   else {
     document.getElementById("doAction").innerHTML = "------";
+	stopInAir();
   }
   // Store this direction for comparing
   last_dir = dir;
-}
-
-//inner part for function stopRotate()
-function stopRotateInner(){
-	stopInAir();//cmd drone to stop
-	stopAction=null;//update stopAction to "no stopping action"
-	rotateStatus=0;//update rotateStatus to not rotating
-}
-
-//function to let drone stop, use setTimeout() function to delay, or stop drone instantly if stopMilliSecond==0
-function stopRotate(stopMilliSecond){
-	//clear previous stopping action if it exists
-	if(stopAction!==null){
-		clearTimeout(stopAction);
-	}
-	if(stopMilliSecond>0){
-		stopAction=setTimeout(stopRotateInner,stopMilliSecond);
-	}else{
-		stopRotateInner();
-	}
-}
-
-//rotate by rotateDir, 1 for CounterClockwise, -1 for Clockwise, the last call on this will stop drone after 1000 msec
-function rotate(rotateDir){
-	var rotateSpeed=0.3; //rotate constant speed
-	var stopDelayMsec=1000; //stop constant delay
-	
-	//if rotating inverse direction then stop first
-	if(rotateDir*rotateStatus==-1){
-		stopRotate(0);
-	}
-	//rotate cmd
-	switch(rotateDir){
-		case 1:
-			rotateCounterClockwise(rotateSpeed);
-			break;
-		case -1:
-			rotateClockwise(rotateSpeed);
-			break;
-		default:
-			return;
-	}
-	//update rotateStatus to rotateDir
-	rotateStatus=rotateDir;
-	//delay stop drone
-	stopRotate(stopDelayMsec);
 }
 
 // Some other fun rotations to try...

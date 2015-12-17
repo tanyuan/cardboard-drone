@@ -1,6 +1,7 @@
 html, body {
   height: 100%;
   margin: 0;
+  background-color: #000;
 }
 
 .main {
@@ -73,6 +74,14 @@ html, body {
 .dummyClass{
 	display:inline-block;
 	margin: 0px;
+}
+
+.topper{
+	height: 140px;
+}
+
+#debugContainer{
+	//display:none;
 }
 
 #canvasContainer:-moz-full-screen {

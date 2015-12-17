@@ -17,6 +17,7 @@
 	<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+	<div class="topper"></div>
 	<div id="canvasContainer" class="myContainer">
 		<div id="dummyLeft" class="canvasClass dummyClass"></div><div id="dummyRight" class="canvasClass dummyClass"></div>
 		<div id="droneStreamLeft" class="canvasClass" style=""></div>
@@ -45,7 +46,7 @@
 			<div align="center"><button onclick="$('#message').trigger('closeModal');">確定</button></div>
 		</div>
 	</div>
-	<div class="myContainer">	
+	<div id="debugContainer" class="myContainer">	
 		<!--Remove below <!-- and -->
 		<!--to enable test buttons and debug info-->
 		<button onclick="stopInAir();">停止動作</button>&nbsp;&nbsp;
