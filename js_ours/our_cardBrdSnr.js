@@ -64,12 +64,12 @@ function calculateAction(tiltLR, tiltFB, dir) {
 	rotate(-1);
   }
   // Turn left
-  else if (dir - last_dir > 5) {
+  else if (dir - last_dir > 10) {
     document.getElementById("doAction").innerHTML = "<<<<<<";
 	rotate(1);
   }
   // Turn right
-  else if (dir - last_dir < -5) {
+  else if (dir - last_dir < -10) {
     document.getElementById("doAction").innerHTML = ">>>>>>";
 	rotate(-1);
   }
@@ -103,28 +103,32 @@ function stopRotate(stopMilliSecond){
 
 //rotate by rotateDir, 1 for CounterClockwise, -1 for Clockwise, the last call on this will stop drone after 1000 msec
 function rotate(rotateDir){
-	var rotateSpeed=0.3; //rotate constant speed
-	var stopDelayMsec=1000; //stop constant delay
-	
-	//if rotating inverse direction then stop first
-	if(rotateDir*rotateStatus==-1){
-		stopRotate(0);
+	if(drone_status===true){
+		var rotateSpeed=0.3; //rotate constant speed
+		var stopDelayMsec=500; //stop constant delay
+		
+		//if rotating inverse direction then stop first
+		/*if(rotateDir*rotateStatus===-1){
+			stopRotate(0);
+		}*/
+		//rotate cmd, only when drone not turning
+		if(rotateDir*rotateStatus===0){
+			switch(rotateDir){
+				case 1:
+					rotateCounterClockwise(rotateSpeed);
+					break;
+				case -1:
+					rotateClockwise(rotateSpeed);
+					break;
+				default:
+					return;
+			}
+			//update rotateStatus to rotateDir
+			rotateStatus=rotateDir;
+		}
+		//delay stop drone
+		stopRotate(stopDelayMsec);
 	}
-	//rotate cmd
-	switch(rotateDir){
-		case 1:
-			rotateCounterClockwise(rotateSpeed);
-			break;
-		case -1:
-			rotateClockwise(rotateSpeed);
-			break;
-		default:
-			return;
-	}
-	//update rotateStatus to rotateDir
-	rotateStatus=rotateDir;
-	//delay stop drone
-	stopRotate(stopDelayMsec);
 }
 
 // Some other fun rotations to try...

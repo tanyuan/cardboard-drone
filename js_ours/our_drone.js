@@ -1,3 +1,4 @@
+//true == flying ; false == landing
 var drone_status=false;
 var socket;
 
