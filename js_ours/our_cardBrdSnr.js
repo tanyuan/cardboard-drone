@@ -1,15 +1,28 @@
 // Track phone orientation
 var count;
 var last_dir;
-var stopAction;
-var rotateStatus;
+var last_tiltLR;
+
+var stopAction;//manage the status of stopping action
+var rotateStatus;//0 for not rotating, 1 for rotating CounterClockwise, -1 for rotating Clockwise
+var rotateSpeed; //rotate constant speed float 0~1
+var stopDelayMsec; //stop constant delay in millisecond
+var thresholdNow;//threshold  now
+var thresholdBigger;//threshold to start rotate
+var thresholdSmaller;//threshold when rotating
 
 function initCardBoardSensor() {
   count=0;
   last_dir=0;
-  isStopping=false;
-  stopAction=null;//manage the status of stopping action
-  rotateStatus=0;//0 for not rotating, 1 rotating CounterClockwise, -1 rotating Clockwise
+  last_tiltLR=0;
+
+  stopAction=null;
+  rotateStatus=0;
+  rotateSpeed=0.3;
+  stopDelayMsec=500;
+  thresholdBigger=30;
+  thresholdSmaller=10;
+  thresholdNow=thresholdBigger;
   
   if (window.DeviceOrientationEvent) {
     document.getElementById("doEvent").innerHTML = "DeviceOrientation";
@@ -54,31 +67,35 @@ function calculateAction(tiltLR, tiltFB, dir) {
   document.getElementById("doTime").innerHTML = count;
   // Exception degree
   // Turn left: from 360 to +0
-  if (dir - last_dir < -350) {
-    document.getElementById("doAction").innerHTML = "<<<<<<+";
-	rotate(1);
-  }
-  // Turn right: from +0 to 360
-  else if (dir - last_dir > 350) {
-    document.getElementById("doAction").innerHTML = ">>>>>>+";
-	rotate(-1);
-  }
-  // Turn left
-  else if (dir - last_dir > 10) {
-    document.getElementById("doAction").innerHTML = "<<<<<<";
-	rotate(1);
-  }
-  // Turn right
-  else if (dir - last_dir < -10) {
-    document.getElementById("doAction").innerHTML = ">>>>>>";
-	rotate(-1);
-  }
-  // No action
-  else {
-    document.getElementById("doAction").innerHTML = "------";
+  if(Math.abs(last_tiltLR-tiltLR)<90){
+	  if (dir - last_dir < (-360+thresholdNow)) {
+		document.getElementById("doAction").innerHTML = "<<<<<<+";
+		rotate(1);
+	  }
+	  // Turn right: from +0 to 360
+	  else if (dir - last_dir > (360-thresholdNow)) {
+		document.getElementById("doAction").innerHTML = ">>>>>>+";
+		rotate(-1);
+	  }
+	  // Turn left
+	  else if (dir - last_dir > thresholdNow) {
+		document.getElementById("doAction").innerHTML = "<<<<<<";
+		rotate(1);
+	  }
+	  // Turn right
+	  else if (dir - last_dir < -thresholdNow) {
+		document.getElementById("doAction").innerHTML = ">>>>>>";
+		rotate(-1);
+	  }
+	  // No action
+	  else {
+		document.getElementById("doAction").innerHTML = "------";
+	  }
   }
   // Store this direction for comparing
   last_dir = dir;
+  // Store this tiltLR for comparing
+  last_tiltLR=tiltLR;
 }
 
 //inner part for function stopRotate()
@@ -86,6 +103,7 @@ function stopRotateInner(){
 	stopInAir();//cmd drone to stop
 	stopAction=null;//update stopAction to "no stopping action"
 	rotateStatus=0;//update rotateStatus to not rotating
+	thresholdNow=thresholdBigger;//update threshold back to start rotate threshold
 }
 
 //function to let drone stop, use setTimeout() function to delay, or stop drone instantly if stopMilliSecond==0
@@ -104,9 +122,6 @@ function stopRotate(stopMilliSecond){
 //rotate by rotateDir, 1 for CounterClockwise, -1 for Clockwise, the last call on this will stop drone after 1000 msec
 function rotate(rotateDir){
 	if(drone_status===true){
-		var rotateSpeed=0.3; //rotate constant speed
-		var stopDelayMsec=500; //stop constant delay
-		
 		//if rotating inverse direction then stop first
 		/*if(rotateDir*rotateStatus===-1){
 			stopRotate(0);
@@ -123,8 +138,8 @@ function rotate(rotateDir){
 				default:
 					return;
 			}
-			//update rotateStatus to rotateDir
-			rotateStatus=rotateDir;
+			rotateStatus=rotateDir;//update rotateStatus to rotateDir
+			thresholdNow=thresholdSmaller;//update threshold to rotating threshold
 		}
 		//delay stop drone
 		stopRotate(stopDelayMsec);
