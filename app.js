@@ -114,6 +114,7 @@ io.sockets.on('connection', function(socket) {
 		client.takeoff();
 		drone_status=true;
 		socket.emit('flying', { status: 'flying' });
+		socket.broadcast.emit('flying', { status: 'flying' });
 	});
 	
 	socket.on('land', function (data) {
@@ -122,6 +123,7 @@ io.sockets.on('connection', function(socket) {
 		client.land();
 		drone_status=false;
 		socket.emit('landing', { status: 'landing' });
+		socket.broadcast.emit('landing', { status: 'landing' });
 	});
 	
 	socket.on('moveStop', function (data) {
