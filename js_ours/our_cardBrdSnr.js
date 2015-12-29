@@ -12,41 +12,45 @@ var thresholdBigger;//threshold to start rotate
 var thresholdSmaller;//threshold when rotating
 
 function initCardBoardSensor() {
-  count=0;
-  last_dir=0;
-  last_tiltLR=0;
+	count=0;
+	last_dir=0;
+	last_tiltLR=0;
 
-  stopAction=null;
-  rotateStatus=0;
-  rotateSpeed=0.3;
-  stopDelayMsec=500;
-  thresholdBigger=30;
-  thresholdSmaller=10;
-  thresholdNow=thresholdBigger;
+	stopAction=null;
+	rotateStatus=0;
+	rotateSpeed=0.3;
+	stopDelayMsec=500;
+	thresholdBigger=2.5;
+	thresholdSmaller=2.5;
+	thresholdNow=thresholdBigger;
   
-  if (window.DeviceOrientationEvent) {
-    document.getElementById("doEvent").innerHTML = "DeviceOrientation";
-    // Listen for the deviceorientation event and handle the raw data
-    window.addEventListener('deviceorientation', function(eventData) {
-      count += 1;
-      // gamma is the left-to-right tilt in degrees, where right is positive
-      var tiltLR = eventData.gamma;
-      
-      // beta is the front-to-back tilt in degrees, where front is positive
-      var tiltFB = eventData.beta;
-      
-      // alpha is the compass direction the device is facing in degrees
-      var dir = eventData.alpha
-      
-      // call our orientation event handler
-      deviceOrientationHandler(tiltLR, tiltFB, dir);
-      if (count%10 == 0) {
-        calculateAction(tiltLR, tiltFB, dir);
-      }
-      }, false);
-  } else {
-    document.getElementById("doEvent").innerHTML = "Not supported on your device or browser.  Sorry."
-  }
+	if (window.DeviceOrientationEvent) {
+		document.getElementById("doEvent").innerHTML = "DeviceOrientation";
+		// Listen for the deviceorientation event and handle the raw data
+		window.addEventListener('deviceorientation', function(eventData) {
+			count += 1;
+			// gamma is the left-to-right tilt in degrees, where right is positive
+			var tiltLR = eventData.gamma;
+		  
+			// beta is the front-to-back tilt in degrees, where front is positive
+			var tiltFB = eventData.beta;
+			
+			// alpha is the compass direction the device is facing in degrees
+			var dir = eventData.alpha+eventData.beta;
+			if(dir >= 360){
+				dir -= 360;
+			}else if(dir <0){
+				dir += 360;
+			}
+			// call our orientation event handler
+			deviceOrientationHandler(tiltLR, tiltFB, dir);
+			if (count%10 == 0) {
+				calculateAction(tiltLR, tiltFB, dir);
+			}
+		}, false);
+	} else {
+		document.getElementById("doEvent").innerHTML = "Not supported on your device or browser.  Sorry."
+	}
 }
 
 // Show device orientation numbers and image in HTML
@@ -66,24 +70,16 @@ function deviceOrientationHandler(tiltLR, tiltFB, dir) {
 function calculateAction(tiltLR, tiltFB, dir) {
   document.getElementById("doTime").innerHTML = count;
   // Exception degree
-  // Turn left: from 360 to +0
   if(Math.abs(last_tiltLR-tiltLR)<90){
-	  if (dir - last_dir < (-360+thresholdNow)) {
-		document.getElementById("doAction").innerHTML = "<<<<<<+";
-		rotate(1);
-	  }
-	  // Turn right: from +0 to 360
-	  else if (dir - last_dir > (360-thresholdNow)) {
-		document.getElementById("doAction").innerHTML = ">>>>>>+";
-		rotate(-1);
-	  }
+	  var dirOffset=angleCalculator(Math.cos(last_dir*Math.PI/180.0),Math.sin(last_dir*Math.PI/180.0),Math.cos(dir*Math.PI/180.0),Math.sin(dir*Math.PI/180.0) );
+	  document.getElementById("dirOffset").innerHTML = dirOffset;
 	  // Turn left
-	  else if (dir - last_dir > thresholdNow) {
+	  if (dirOffset > thresholdNow) {
 		document.getElementById("doAction").innerHTML = "<<<<<<";
 		rotate(1);
 	  }
 	  // Turn right
-	  else if (dir - last_dir < -thresholdNow) {
+	  else if (dirOffset < -thresholdNow) {
 		document.getElementById("doAction").innerHTML = ">>>>>>";
 		rotate(-1);
 	  }
@@ -119,7 +115,7 @@ function stopRotate(stopMilliSecond){
 	}
 }
 
-//rotate by rotateDir, 1 for CounterClockwise, -1 for Clockwise, the last call on this will stop drone after 1000 msec
+//rotate by rotateDir, 1 for CounterClockwise, -1 for Clockwise, the last call on this will stop drone after startDelayMsec msec
 function rotate(rotateDir){
 	if(drone_status===true){
 		//if rotating inverse direction then stop first
@@ -146,6 +142,14 @@ function rotate(rotateDir){
 	}
 }
 
+//function to calculate angle between 2 vectors
+function angleCalculator(fromX,fromY,toX,toY){
+	var dot=0.00;
+	var det=0.00;
+	dot = fromX * toX + fromY * toY;
+	det = fromX * toY - toX * fromY;
+	return Math.atan2(det, dot)*180.0 / Math.PI; 
+}
 // Some other fun rotations to try...
 //var rotation = "rotate3d(0,1,0, "+ (tiltLR*-1)+"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";
 //var rotation = "rotate("+ tiltLR +"deg) rotate3d(0,1,0, "+ (tiltLR*-1)+"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";

@@ -98,21 +98,30 @@ server.listen(8001);
 
 var io = require('socket.io').listen(server);
 
+var acting=false;//if drone acting
+
 //accept drone cmd via socket.io, control drone by client.<function name>(); 
 io.sockets.on('connection', function(socket) {
 
 	console.log('socketIOconnect');
 	
+	//send drone take off / land info to drone
 	if(drone_status){
 		socket.emit('flying', { status: 'flying' });
 	}else{
 		socket.emit('landing', { status: 'landing' });
 	}
 	
+	//kinect program connected
+	socket.on('hello', function (data) {
+		console.log('kinect online');
+	});
+	
 	socket.on('takeoff', function (data) {
 		console.log(data);
 		client.takeoff();
 		drone_status=true;
+		//send event to clients let them know drone take off success
 		socket.emit('flying', { status: 'flying' });
 		socket.broadcast.emit('flying', { status: 'flying' });
 	});
@@ -122,53 +131,81 @@ io.sockets.on('connection', function(socket) {
 		client.stop();
 		client.land();
 		drone_status=false;
+		//send event to clients let them know drone land success
 		socket.emit('landing', { status: 'landing' });
 		socket.broadcast.emit('landing', { status: 'landing' });
 	});
 	
+	//please trigger moveStop event to unlock drone after first action command
 	socket.on('moveStop', function (data) {
 		console.log(data);
 		client.stop();
+		acting=false;
 	});
 
+	//only when drone is flying and not doing any action will command be sent to drone
 	socket.on('moveUp', function (data) {
 		console.log(data);
-		client.up(data.speed);
+		if((drone_status)&&(!acting)){
+			client.up(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('moveDown', function (data) {
 		console.log(data);
-		client.down(data.speed);
+		if((drone_status)&&(!acting)){
+			client.down(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('moveLeft', function (data) {
 		console.log(data);
-		client.left(data.speed);
+		if((drone_status)&&(!acting)){
+			client.left(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('moveRight', function (data) {
 		console.log(data);
-		client.right(data.speed);
+		if((drone_status)&&(!acting)){
+			client.right(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('moveFront', function (data) {
 		console.log(data);
-		client.front(data.speed);
+		if((drone_status)&&(!acting)){
+			client.front(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('moveBack', function (data) {
 		console.log(data);
-		client.back(data.speed);
+		if((drone_status)&&(!acting)){
+			client.back(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('rotateClockwise', function (data) {
 		console.log(data);
-		client.clockwise(data.speed);
+		if((drone_status)&&(!acting)){
+			client.clockwise(data.speed);
+			acting=true;
+		}
 	});
 
 	socket.on('rotateCounterClockwise', function (data) {
 		console.log(data);
-		client.counterClockwise(data.speed);
+		if((drone_status)&&(!acting)){
+			client.counterClockwise(data.speed);
+			acting=true;
+		}
 	});	
 	
 	socket.on('message', function (data) {
