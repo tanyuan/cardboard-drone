@@ -27,11 +27,28 @@ client.config('general:navdata_options', navdata_options);
 client.config('video:video_channel', 0);
 client.config('detect:detect_type', 12);
 
+//  Map sensor angle [0, 180),[-0,-180) to [0,360] counterClockwise
+function convertAngle(theta) {
+    var newTheta; 
+    if(theta >= 0){
+		newTheta = theta;
+	}else{ 
+		newTheta = 360 + theta;
+	}
+ 	newTheta=360-newTheta;
+	if(newTheta >= 360){
+		newTheta -= 360;
+	}else if(newTheta <0){
+		newTheta += 360;
+	}
+    return newTheta;
+}
+
 //record drone direction
-var clockwiseDegree=0;
+var counterClockwiseDegree=0;
 client.on('navdata', function(data){
 	if(data.demo){
-		clockwiseDegree=data.demo.clockwiseDegrees;
+		counterClockwiseDegree=convertAngle(data.demo.clockwiseDegrees);
 	}
 });
 
@@ -115,6 +132,26 @@ io.sockets.on('connection', function(socket) {
 	//kinect program connected
 	socket.on('hello', function (data) {
 		console.log('kinect online');
+	});
+	
+	//event to debug, auto change drone counterClockwiseDegree
+	/*socket.on('test', function (data) {
+		counterClockwiseDegree+=5;
+		if(counterClockwiseDegree >= 360){
+			counterClockwiseDegree -= 360;
+		}else if(counterClockwiseDegree <0){
+			counterClockwiseDegree += 360;
+		}
+	});*/
+	
+	//answer counterClockwiseDegree before drone really start to rotate
+	socket.on('angleAskToStartRotate', function (data) {
+		socket.emit('angleAnsToStartRotate', { angle: counterClockwiseDegree });
+	});
+	
+	//answer counterClockwiseDegree when drone try to stop rotating
+	socket.on('angleAskToStopRotate', function (data) {
+		socket.emit('angleAnsToStopRotate', { angle: counterClockwiseDegree });
 	});
 	
 	socket.on('takeoff', function (data) {
@@ -209,7 +246,7 @@ io.sockets.on('connection', function(socket) {
 	});	
 	
 	socket.on('message', function (data) {
-		console.log(data.debug);
+		console.log(data);
 	});
 });
 

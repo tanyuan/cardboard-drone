@@ -144,6 +144,10 @@ function initCanvasPos(side){
 
 //called every frame
 function animate(){
+	//check if stop drone if it is really rotating (ask server)
+	if(droneRotating===true){
+		socket.emit('angleAskToStopRotate', { cmd: 'angleAskToStopRotate' });
+	}
 	requestAnimationFrame( animate );
 	render();
 }
