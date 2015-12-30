@@ -12,14 +12,16 @@ var thresholdBigger;//threshold to start rotate
 var thresholdSmaller;//threshold when rotating
 
 var cummuDirOffset;//cumulative turning degree
-var droneTargetAngle;//final angle drone should face
-var rotatePhase;//the rotation phase of drone, 0 for initial phase, 1 for middle phase( exist when the initial direction from droneAngleNow to droneTargetAngle inverse with drone rotation direction ), 2 for finish phase
-var rotateType;//true when the initial direction from droneAngleNow to droneTargetAngle is the same as drone rotation direction, false otherwise
+var cummuDirOffsetDrone;//cumulative turning degree drone really turned
+var last_droneAngle;//last frame droneAngleNow 
 var droneRotating;//if drone really rotating
+var frameCountDrone;//frame counts after drone really start rotation
+var checkIntervalDrone;//interval of frame to check drone angle offset
 
 //event to debug, auto change drone counterClockwiseDegree
-/*function test(){
-	socket.emit('test', { cmd: 'test' });
+/*var testDir;
+function test(){
+	socket.emit('test', { cmd: 'test' , dir: testDir});
 }*/
 
 function initCardBoardSensor() {
@@ -36,6 +38,7 @@ function initCardBoardSensor() {
 	thresholdNow=thresholdBigger;
 	
 	droneRotating=false;
+	checkIntervalDrone=10;
   
 	//event to really start rotation
 	socket.on('angleAnsToStartRotate', function(data) {
@@ -48,13 +51,17 @@ function initCardBoardSensor() {
 	});
 	
 	//event to debug, auto change drone counterClockwiseDegree
-	//setInterval(test,1000);
+	/*testDir=0;
+	setInterval(test,1000);*/
   
 	if (window.DeviceOrientationEvent) {
 		document.getElementById("doEvent").innerHTML = "DeviceOrientation";
 		// Listen for the deviceorientation event and handle the raw data
 		window.addEventListener('deviceorientation', function(eventData) {
 			count += 1;
+			if(count===10000){
+				count=0;
+			}
 			// gamma is the left-to-right tilt in degrees, where right is positive
 			var tiltLR = eventData.gamma;
 			  
@@ -122,87 +129,71 @@ function calculateAction(tiltLR, tiltFB, dir) {
 
 //function to really start rotation
 function angleAnsToStartRotateCallback(droneAngleNow){
-	//calculate droneTargetAngle
-	droneTargetAngle=droneAngleNow+cummuDirOffset;
-	if(droneTargetAngle >= 360){
-		droneTargetAngle -= (Math.floor(droneTargetAngle/360)*360);
-	}else if(droneTargetAngle <0){
-		droneTargetAngle += ((Math.ceil(droneTargetAngle/-360))*360);
+	//initialize cummuDirOffsetDrone and last_droneAngle and frameCountDrone
+	cummuDirOffsetDrone=0;
+	frameCountDrone=0;
+	last_droneAngle=droneAngleNow;
+	//change rotateStatus direction according to final cummuDirOffset
+	if(cummuDirOffset>0){
+		rotateStatus=1;
+	}else if(cummuDirOffset<0){
+		rotateStatus=-1;
+	}else if(cummuDirOffset===0){
+		rotateStatus=0;
 	}
-	//initialize rotatePhase
-	rotatePhase=0;
-	//decide rotateType according to rotateStatus/droneTargetAngle/droneAngleNow and really start rotation
+	//debug info
+	/*socket.emit('message', { debug: last_droneAngle , varName:'last_droneAngle'});
+	socket.emit('message', { debug: cummuDirOffset , varName:'cummuDirOffset'});
+	testDir=rotateStatus;*/
+	//really start drone rotation
 	switch(rotateStatus){
 		case 1:
-			if(droneTargetAngle>=droneAngleNow){
-				rotateType=true;
-			}else{
-				rotateType=false;
-			}
 			rotateCounterClockwise(rotateSpeed);
 			break;
 		case -1:
-			if(droneTargetAngle<=droneAngleNow){
-				rotateType=true;
-			}else{
-				rotateType=false;
-			}
 			rotateClockwise(rotateSpeed);
 			break;
 		default:
 			return;
 	}
-	//debug info
-	//socket.emit('message', { debug: droneAngleNow , varName:'droneAngleNow'});
-	//socket.emit('message', { debug: cummuDirOffset , varName:'cummuDirOffset'});
-	//socket.emit('message', { debug: droneTargetAngle , varName:'droneTargetAngle'});
-	//socket.emit('message', { debug: rotateType , varName:'rotateType'});
+	droneRotating=true;//drone really start rotation
 }
 
 //function that try to stop rotation
 function angleAnsToStopRotateCallback(droneAngleNow){
-	//change rotatePhase according to rotateStatus/droneTargetAngle/droneAngleNow/rotateType/rotatePhase
+	var stopFlag=false;
+	//calculate drone angle offset and cumulative DirOffsetDrone
+	cummuDirOffsetDrone+=angleCalculator(Math.cos(last_droneAngle*Math.PI/180.0),Math.sin(last_droneAngle*Math.PI/180.0),Math.cos(droneAngleNow*Math.PI/180.0),Math.sin(droneAngleNow*Math.PI/180.0) );
+	//judge if stop drone
 	switch(rotateStatus){
 		case 1:
-			if(rotateType){
-				if(droneAngleNow>=droneTargetAngle){
-					rotatePhase=2;
-				}
-			}else{
-				if((rotatePhase===0)&&(droneAngleNow<=droneTargetAngle)){
-					rotatePhase=1;
-				}else if((rotatePhase===1)&&(droneAngleNow>=droneTargetAngle)){
-					rotatePhase=2;
-				}
+			if(cummuDirOffsetDrone>=cummuDirOffset){
+				stopFlag=true;
 			}
 			break;
 		case -1:
-			if(rotateType){
-				if(droneAngleNow<=droneTargetAngle){
-					rotatePhase=2;
-				}
-			}else{
-				if((rotatePhase===0)&&(droneAngleNow>=droneTargetAngle)){
-					rotatePhase=1;
-				}else if((rotatePhase===1)&&(droneAngleNow<=droneTargetAngle)){
-					rotatePhase=2;
-				}
+			if(cummuDirOffsetDrone<=cummuDirOffset){
+				stopFlag=true;
 			}
 			break;
 		default:
-			return;
+			stopFlag=true;
 	}
-	//if rotatePhase = finish phase, stop drone and initialize rotation flags
-	if(rotatePhase===2){
+	//stop drone
+	if(stopFlag===true){
 		stopInAir();
 		rotateStatus=0;
 		droneRotating=false;
+		//for debug
+		//testDir=rotateStatus;
 	}
+	last_droneAngle=droneAngleNow;
+	//debug info
+	//socket.emit('message', { debug: cummuDirOffsetDrone , varName:'cummuDirOffsetDrone'});
 }
 
 //inner part for function startRotate()
 function startRotateInner(){
-	droneRotating=true;//drone really start rotation
 	startAction=null;//update startAction to "no starting action"
 	thresholdNow=thresholdBigger;//update threshold back to start rotate threshold
 	socket.emit('angleAskToStartRotate', { cmd: 'angleAskToStartRotate' });//trigger angleAskToStartRotate event(ask server)

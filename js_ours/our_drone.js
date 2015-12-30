@@ -1,8 +1,14 @@
 //true == flying ; false == landing
 var drone_status=false;
 var socket;
+var frameCountVideo;//frame counts to copy video
+var checkIntervalVideo;//interval of frame to copy video
 
 function initDroneCtrl(){
+	//frameCountVideo and checkIntervalVideo init
+	frameCountVideo=0;
+	checkIntervalVideo=1;
+	
 	//socket init
 	socket=io.connect();
 	
@@ -144,20 +150,36 @@ function initCanvasPos(side){
 
 //called every frame
 function animate(){
-	//check if stop drone if it is really rotating (ask server)
-	if(droneRotating===true){
-		socket.emit('angleAskToStopRotate', { cmd: 'angleAskToStopRotate' });
-	}
-	requestAnimationFrame( animate );
+	checkAngle();
 	render();
+	requestAnimationFrame( animate );
+}
+
+//check if stop drone if it is really rotating (ask server)
+function checkAngle(){
+	if(droneRotating===true){
+		frameCountDrone+=1;
+		if(frameCountDrone===10000){
+			frameCountDrone=0;
+		}
+		if(frameCountDrone%checkIntervalDrone === 0){
+			socket.emit('angleAskToStopRotate', { cmd: 'angleAskToStopRotate' });
+		}
+	}
 }
 
 //copy left canvas to right canvas
 function render(){
-	var canvasLeft = $('#droneStreamLeft > canvas')[0];
-	var canvasRight = $('#droneStreamRight > canvas')[0];
-	
-	var ctxRight = canvasRight.getContext('2d');
-	//call its drawImage() function passing it the source canvas directly
-	ctxRight.drawImage(canvasLeft, 0, 0);
+	frameCountVideo+=1;
+	if(frameCountVideo===10000){
+		frameCountVideo=0;
+	}
+	if(frameCountVideo%checkIntervalVideo === 0){
+		var canvasLeft = $('#droneStreamLeft > canvas')[0];
+		var canvasRight = $('#droneStreamRight > canvas')[0];
+		
+		var ctxRight = canvasRight.getContext('2d');
+		//call its drawImage() function passing it the source canvas directly
+		ctxRight.drawImage(canvasLeft, 0, 0);
+	}
 }

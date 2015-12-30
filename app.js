@@ -136,7 +136,16 @@ io.sockets.on('connection', function(socket) {
 	
 	//event to debug, auto change drone counterClockwiseDegree
 	/*socket.on('test', function (data) {
-		counterClockwiseDegree+=5;
+		switch(data.dir){
+			case 1:
+				counterClockwiseDegree+=5;
+				break;
+			case -1:
+				counterClockwiseDegree-=5;
+				break;
+			default:
+				counterClockwiseDegree+=0;
+		}
 		if(counterClockwiseDegree >= 360){
 			counterClockwiseDegree -= 360;
 		}else if(counterClockwiseDegree <0){
