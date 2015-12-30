@@ -29,6 +29,9 @@ function initCardBoardSensor() {
 		// Listen for the deviceorientation event and handle the raw data
 		window.addEventListener('deviceorientation', function(eventData) {
 			count += 1;
+			if(count===10000){
+				count=0;
+			}
 			// gamma is the left-to-right tilt in degrees, where right is positive
 			var tiltLR = eventData.gamma;
 		  
