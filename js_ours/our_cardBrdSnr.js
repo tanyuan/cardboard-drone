@@ -125,9 +125,9 @@ function angleAnsToStartRotateCallback(droneAngleNow){
 	//calculate droneTargetAngle
 	droneTargetAngle=droneAngleNow+cummuDirOffset;
 	if(droneTargetAngle >= 360){
-		droneTargetAngle -= 360;
+		droneTargetAngle -= (Math.floor(droneTargetAngle/360)*360);
 	}else if(droneTargetAngle <0){
-		droneTargetAngle += 360;
+		droneTargetAngle += ((Math.ceil(droneTargetAngle/-360))*360);
 	}
 	//initialize rotatePhase
 	rotatePhase=0;
