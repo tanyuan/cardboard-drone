@@ -1,0 +1,4 @@
+change 
+line 10 to line 11  &
+line 87 to line 88
+in appjs file if connecting true drone

@@ -26,7 +26,7 @@ function initDroneCtrl(){
 	});
 	
 	//dronestream init
-	new NodecopterStream(document.getElementById('droneStreamLeft'));
+	new NodecopterStream(document.getElementById('droneStream'));
 	
 	initTapEventFlagArray(1);
 	initCanvasPos("Left");
@@ -154,18 +154,21 @@ function animate(){
 	requestAnimationFrame( animate );
 }
 
-//copy left canvas to right canvas
+//copy left canvas to left/right canvas
 function render(){
 	frameCountVideo+=1;
 	if(frameCountVideo===10000){
 		frameCountVideo=0;
 	}
 	if(frameCountVideo%checkIntervalVideo === 0){
+		var canvas = $('#droneStream > canvas')[0];
 		var canvasLeft = $('#droneStreamLeft > canvas')[0];
 		var canvasRight = $('#droneStreamRight > canvas')[0];
 		
+		var ctxLeft = canvasLeft.getContext('2d');
 		var ctxRight = canvasRight.getContext('2d');
 		//call its drawImage() function passing it the source canvas directly
-		ctxRight.drawImage(canvasLeft, 0, 0);
+		ctxLeft.drawImage(canvas, 0, 0);
+		ctxRight.drawImage(canvas, 0, 0);
 	}
 }

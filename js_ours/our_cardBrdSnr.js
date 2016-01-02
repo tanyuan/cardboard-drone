@@ -20,8 +20,8 @@ function initCardBoardSensor() {
 	rotateStatus=0;
 	rotateSpeed=0.3;
 	stopDelayMsec=500;
-	thresholdBigger=2.5;
-	thresholdSmaller=2.5;
+	thresholdBigger=5;
+	thresholdSmaller=5;
 	thresholdNow=thresholdBigger;
   
 	if (window.DeviceOrientationEvent) {

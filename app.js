@@ -84,7 +84,8 @@ var server = http.createServer(function(req, res){
 });
 
 //start servers
-drone_Stream.listen(server);
+drone_Stream.listen(server,{ ip: '127.0.0.1' });//use when debugging
+//drone_Stream.listen(server);//use when connecting drone
 server.listen(8001);
 
 var io = require('socket.io').listen(server);
@@ -109,6 +110,9 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	socket.on('takeoff', function (data) {
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		console.log(data);
 		client.takeoff();
 		drone_status=true;
@@ -118,6 +122,9 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	socket.on('land', function (data) {
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		console.log(data);
 		client.stop();
 		client.land();
@@ -129,6 +136,9 @@ io.sockets.on('connection', function(socket) {
 	
 	//please trigger moveStop event to unlock drone after first action command
 	socket.on('moveStop', function (data) {
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		console.log(data);
 		client.stop();
 		acting=false;
@@ -136,70 +146,97 @@ io.sockets.on('connection', function(socket) {
 
 	//only when drone is flying and not doing any action will command be sent to drone
 	socket.on('moveUp', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.up(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('moveDown', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.down(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('moveLeft', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.left(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('moveRight', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.right(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('moveFront', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.front(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('moveBack', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.back(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('rotateClockwise', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.clockwise(data.speed);
 			acting=true;
 		}
 	});
 
 	socket.on('rotateCounterClockwise', function (data) {
-		console.log(data);
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		if((drone_status)&&(!acting)){
+			console.log(data);
 			client.counterClockwise(data.speed);
 			acting=true;
 		}
 	});	
 	
 	socket.on('message', function (data) {
+		if(typeof data === 'string'){
+			data=JSON.parse(data);
+		}
 		console.log(data.debug);
 	});
 });
