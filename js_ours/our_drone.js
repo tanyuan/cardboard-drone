@@ -7,7 +7,7 @@ var checkIntervalVideo;//interval of frame to copy video
 function initDroneCtrl(){
 	//frameCountVideo and checkIntervalVideo init
 	frameCountVideo=0;
-	checkIntervalVideo=1;
+	checkIntervalVideo=2;
 	
 	//socket init
 	socket=io.connect();

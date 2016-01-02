@@ -37,15 +37,6 @@ client.on('navdata', function(data){
 
 //drone flying or not
 var drone_status=false;
-  
-//can use to get screen shot
-var pngStream = client.getPngStream();
-var lastPng;
-pngStream
-  .on('error', console.log)
-  .on('data', function(pngBuffer) {
-    lastPng = pngBuffer;
-});
 
 //node.js server
 var server = http.createServer(function(req, res){
@@ -93,7 +84,7 @@ var server = http.createServer(function(req, res){
 });
 
 //start servers
-drone_Stream.listen(server,{tcpVideoStream:client.getVideoStream()});
+drone_Stream.listen(server);
 server.listen(8001);
 
 var io = require('socket.io').listen(server);
