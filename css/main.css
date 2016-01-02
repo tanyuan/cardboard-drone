@@ -71,6 +71,10 @@ html, body {
 	height: 360px;
 }
 
+.hide{
+	display:none;
+}
+
 .dummyClass{
 	display:inline-block;
 	margin: 0px;

@@ -17,10 +17,14 @@
 	<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-	<div class="topper"></div>
+	<div class="topper">
+		<div id="droneStream" class="canvasClass hide" style=""></div>
+	</div>
 	<div id="canvasContainer" class="myContainer">
 		<div id="dummyLeft" class="canvasClass dummyClass"></div><div id="dummyRight" class="canvasClass dummyClass"></div>
-		<div id="droneStreamLeft" class="canvasClass" style=""></div>
+		<div id="droneStreamLeft" class="canvasClass" style="">
+			<canvas width="640" height="360" style="background-color: rgb(51, 51, 51);"></canvas>
+		</div>
 		<div id="droneStreamRight" class="canvasClass" style="">
 			<canvas width="640" height="360" style="background-color: rgb(51, 51, 51);"></canvas>
 		</div>
@@ -52,12 +56,12 @@
 		<button onclick="stopInAir();">停止動作</button>&nbsp;&nbsp;
 		<button onclick="$('#checkTakeoff').trigger('openModal');">起飛</button>&nbsp;&nbsp;
 		<button onclick="$('#checkLand').trigger('openModal');">降落</button>&nbsp;&nbsp;
-		<button onclick="moveUp(0.6);">上</button>&nbsp;&nbsp;
-		<button onclick="moveDown(0.6);">下</button>&nbsp;&nbsp;
-		<button onclick="moveLeft(0.3);">左</button>&nbsp;&nbsp;
-		<button onclick="moveRight(0.3);">右</button>&nbsp;&nbsp;
-		<button onclick="moveFront(0.6);">前</button>&nbsp;&nbsp;
-		<button onclick="moveBack(0.6);">後</button>&nbsp;&nbsp;
+		<button onclick="moveUp(0.1);">上</button>&nbsp;&nbsp;
+		<button onclick="moveDown(0.1);">下</button>&nbsp;&nbsp;
+		<button onclick="moveLeft(0.1);">左</button>&nbsp;&nbsp;
+		<button onclick="moveRight(0.1);">右</button>&nbsp;&nbsp;
+		<button onclick="moveFront(0.1);">前</button>&nbsp;&nbsp;
+		<button onclick="moveBack(0.1);">後</button>&nbsp;&nbsp;
 		<button onclick="rotateClockwise(0.3);">順旋</button>&nbsp;&nbsp;
 		<button onclick="rotateCounterClockwise(0.3);">逆旋</button>&nbsp;&nbsp;
 		<button onclick="fullscreen();">全螢</button>&nbsp;&nbsp;
