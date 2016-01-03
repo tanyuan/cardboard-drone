@@ -3,26 +3,19 @@ var count;
 var last_dir;
 var last_tiltLR;
 
-var stopAction;//manage the status of stopping action
 var rotateStatus;//0 for not rotating, 1 for rotating CounterClockwise, -1 for rotating Clockwise
 var rotateSpeed; //rotate constant speed float 0~1
-var stopDelayMsec; //stop constant delay in millisecond
-var thresholdNow;//threshold  now
-var thresholdBigger;//threshold to start rotate
-var thresholdSmaller;//threshold when rotating
+var initDir;//takeoff initial direction
+var threshold;//threshold to rotate
 
 function initCardBoardSensor() {
 	count=0;
 	last_dir=0;
 	last_tiltLR=0;
-
-	stopAction=null;
+	
 	rotateStatus=0;
-	rotateSpeed=0.3;
-	stopDelayMsec=500;
-	thresholdBigger=5;
-	thresholdSmaller=5;
-	thresholdNow=thresholdBigger;
+	rotateSpeed=0.2;
+	threshold=20;
   
 	if (window.DeviceOrientationEvent) {
 		document.getElementById("doEvent").innerHTML = "DeviceOrientation";
@@ -45,10 +38,18 @@ function initCardBoardSensor() {
 			}else if(dir <0){
 				dir += 360;
 			}
+			
 			// call our orientation event handler
 			deviceOrientationHandler(tiltLR, tiltFB, dir);
 			if (count%10 == 0) {
-				calculateAction(tiltLR, tiltFB, dir);
+				document.getElementById("doTime").innerHTML = count;
+				// Store this direction for comparing
+				last_dir = dir;
+				// Store this tiltLR for comparing
+				last_tiltLR=tiltLR;
+				if(drone_status===true){
+					calculateAction(tiltLR, tiltFB, dir);
+				}
 			}
 		}, false);
 	} else {
@@ -71,77 +72,44 @@ function deviceOrientationHandler(tiltLR, tiltFB, dir) {
 
 // Calculate head action by device orientation
 function calculateAction(tiltLR, tiltFB, dir) {
-  document.getElementById("doTime").innerHTML = count;
-  // Exception degree
   if(Math.abs(last_tiltLR-tiltLR)<90){
-	  var dirOffset=angleCalculator(Math.cos(last_dir*Math.PI/180.0),Math.sin(last_dir*Math.PI/180.0),Math.cos(dir*Math.PI/180.0),Math.sin(dir*Math.PI/180.0) );
+	  var dirOffset=angleCalculator(Math.cos(initDir*Math.PI/180.0),Math.sin(initDir*Math.PI/180.0),Math.cos(dir*Math.PI/180.0),Math.sin(dir*Math.PI/180.0) );
 	  document.getElementById("dirOffset").innerHTML = dirOffset;
 	  // Turn left
-	  if (dirOffset > thresholdNow) {
+	  if (dirOffset > threshold) {
 		document.getElementById("doAction").innerHTML = "<<<<<<";
 		rotate(1);
 	  }
 	  // Turn right
-	  else if (dirOffset < -thresholdNow) {
+	  else if (dirOffset < -threshold) {
 		document.getElementById("doAction").innerHTML = ">>>>>>";
 		rotate(-1);
 	  }
 	  // No action
 	  else {
 		document.getElementById("doAction").innerHTML = "------";
+		if(rotateStatus!==0){
+			stopInAir();//cmd drone to stop
+			rotateStatus=0;//update rotateStatus to not rotating
+		}
 	  }
   }
-  // Store this direction for comparing
-  last_dir = dir;
-  // Store this tiltLR for comparing
-  last_tiltLR=tiltLR;
-}
-
-//inner part for function stopRotate()
-function stopRotateInner(){
-	stopInAir();//cmd drone to stop
-	stopAction=null;//update stopAction to "no stopping action"
-	rotateStatus=0;//update rotateStatus to not rotating
-	thresholdNow=thresholdBigger;//update threshold back to start rotate threshold
-}
-
-//function to let drone stop, use setTimeout() function to delay, or stop drone instantly if stopMilliSecond==0
-function stopRotate(stopMilliSecond){
-	//clear previous stopping action if it exists
-	if(stopAction!==null){
-		clearTimeout(stopAction);
-	}
-	if(stopMilliSecond>0){
-		stopAction=setTimeout(stopRotateInner,stopMilliSecond);
-	}else{
-		stopRotateInner();
-	}
 }
 
 //rotate by rotateDir, 1 for CounterClockwise, -1 for Clockwise, the last call on this will stop drone after startDelayMsec msec
 function rotate(rotateDir){
-	if(drone_status===true){
-		//if rotating inverse direction then stop first
-		/*if(rotateDir*rotateStatus===-1){
-			stopRotate(0);
-		}*/
-		//rotate cmd, only when drone not turning
-		if(rotateDir*rotateStatus===0){
-			switch(rotateDir){
-				case 1:
-					rotateCounterClockwise(rotateSpeed);
-					break;
-				case -1:
-					rotateClockwise(rotateSpeed);
-					break;
-				default:
-					return;
-			}
-			rotateStatus=rotateDir;//update rotateStatus to rotateDir
-			thresholdNow=thresholdSmaller;//update threshold to rotating threshold
+	if(rotateStatus===0){
+		switch(rotateDir){
+			case 1:
+				rotateCounterClockwise(rotateSpeed);
+				break;
+			case -1:
+				rotateClockwise(rotateSpeed);
+				break;
+			default:
+				return;
 		}
-		//delay stop drone
-		stopRotate(stopDelayMsec);
+		rotateStatus=rotateDir;//update rotateStatus to rotateDir
 	}
 }
 

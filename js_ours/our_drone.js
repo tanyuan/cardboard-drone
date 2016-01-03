@@ -16,6 +16,8 @@ function initDroneCtrl(){
 	socket.on('flying', function(data) {
 		$('#powerLeft').attr('src', 'flying.ico');
 		$('#powerRight').attr('src', 'flying.ico');
+		initDir=last_dir;
+		//socket.emit('message', {cmd: 'message', debug: initDir});
 		drone_status=true;
 	});
 	
