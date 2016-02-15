@@ -1,149 +1,114 @@
 <!doctype html>
-<html lang="en"> 
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title></title>
-  
-  <style type="text/css">
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-  
-      .main {
-      display: none;
-      border: 1px solid black;
-      box-shadow: 10px 10px 5px #888;
-      border-radius: 12px;
-      padding: 20px;
-      background-color: #ddd;
-      margin: 25px;
-      width: 450px;
-      margin-left:auto;
-      margin-right:auto;  
-    }
-    
-    .logo {
-      width:275px;
-      margin-left: auto;
-      margin-right: auto;
-      display: block;
-      padding: 15px;
-    }
-    
-    .container {
-      display: none;
-      -webkit-perspective: 300; perspective: 300;
-    }
-
-    #viewer {
-        display: inline;
-        width:100%;
-        min-height:100%;
-    }
-
-    #left-video {
-        /* border: 1px solid black; */
-        background-image: url("html5_logo.png");
-        background-size: cover;
-        position: absolute;
-        top: 0;
-        left: 0;
-        min-height: 100%;
-        width: 50%;
-    }
-    #right-video {
-        /* border: 1px solid red; */
-        background-image: url("html5_logo.png");
-        background-size: cover;
-        position: absolute;
-        top: 0;
-        right: 0;
-        min-height: 100%;
-        width: 50%;
-    }
-  </style>
-
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=1280">
+    <title>DroneVR</title>
+	<script src="/dronestream/nodecopter-client.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="js_lib/jquery.min.js" ></script>
+	<script src="js_lib/hammer.js" ></script>
+	<script src="js_lib/jquery.easyModal.js"></script>
+	
+	<script src="js_ours/our_hammer.js" ></script>
+	<script src="js_ours/our_cardBrdSnr.js" ></script>
+	<script src="js_ours/our_drone.js"></script>
+	<script src="js_ours/our_fullScreen.js" ></script>
+	<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-  <div id="viewer">
-    <div id="left-video"></div>
-    <div id="right-video"></div>
-    <!--<iframe id="left-video" src="video.html"></iframe>-->
-    <!--<iframe id="right-video" src="video.html"></iframe>-->
-  </div>
-
-  <div class="main">
-      <h2>Device Orientation</h2>
-      <table>
-        <tr>
-          <td>Event Supported</td>
-          <td id="doEvent"></td>
-        </tr>
-        <tr>
-          <td>Tilt Left/Right [gamma]</td>
-          <td id="doTiltLR"></td>
-        </tr>
-        <tr>
-          <td>Tilt Front/Back [beta]</td>
-          <td id="doTiltFB"></td>
-        </tr>
-        <tr>
-          <td>Direction [alpha]</td>
-          <td id="doDirection"></td>
-        </tr>
-      </table>
-  </div>
-  
-  <div class="container" style="-webkit-perspective: 300; perspective: 300;">
-    <img src="html5_logo.png" id="imgLogo" class="logo">
-  </div>
-  
-  <script type="text/javascript">
-    init();
-    var count = 0;
-    
-    function init() {
-      if (window.DeviceOrientationEvent) {
-        document.getElementById("doEvent").innerHTML = "DeviceOrientation";
-        // Listen for the deviceorientation event and handle the raw data
-        window.addEventListener('deviceorientation', function(eventData) {
-          // gamma is the left-to-right tilt in degrees, where right is positive
-          var tiltLR = eventData.gamma;
-          
-          // beta is the front-to-back tilt in degrees, where front is positive
-          var tiltFB = eventData.beta;
-          
-          // alpha is the compass direction the device is facing in degrees
-          var dir = eventData.alpha
-          
-          // call our orientation event handler
-          deviceOrientationHandler(tiltLR, tiltFB, dir);
-          }, false);
-      } else {
-        document.getElementById("doEvent").innerHTML = "Not supported on your device or browser.  Sorry."
-      }
-    }
-  
-    function deviceOrientationHandler(tiltLR, tiltFB, dir) {
-      document.getElementById("doTiltLR").innerHTML = Math.round(tiltLR);
-      document.getElementById("doTiltFB").innerHTML = Math.round(tiltFB);
-      document.getElementById("doDirection").innerHTML = Math.round(dir);
-      
-      // Apply the transform to the image
-      var logo = document.getElementById("imgLogo");
-      logo.style.webkitTransform = "rotate("+ tiltLR +"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";
-      logo.style.MozTransform = "rotate("+ tiltLR +"deg)";
-      logo.style.transform = "rotate("+ tiltLR +"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";
-    }
-    
-    
-    // Some other fun rotations to try...
-    //var rotation = "rotate3d(0,1,0, "+ (tiltLR*-1)+"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";
-    //var rotation = "rotate("+ tiltLR +"deg) rotate3d(0,1,0, "+ (tiltLR*-1)+"deg) rotate3d(1,0,0, "+ (tiltFB*-1)+"deg)";
-  </script>
-  
-  
-
+	<div class="topper">
+		<div id="droneStream" class="canvasClass hide" style=""></div>
+	</div>
+	<div id="canvasContainer" class="myContainer">
+		<div id="dummyLeft" class="canvasClass dummyClass"></div><div id="dummyRight" class="canvasClass dummyClass"></div>
+		<div id="droneStreamLeft" class="canvasClass" style="">
+			<canvas width="640" height="360" style="background-color: rgb(51, 51, 51);"></canvas>
+		</div>
+		<div id="droneStreamRight" class="canvasClass" style="">
+			<canvas width="640" height="360" style="background-color: rgb(51, 51, 51);"></canvas>
+		</div>
+		<div id="our_hammerLeft" class="canvasClass" style="">
+			<img id="powerLeft" src="landing.ico" height="50" width="50" style=""/>
+		</div>
+		<div id="our_hammerRight" class="canvasClass" style="">
+			<img id="powerRight" src="landing.ico" height="50" width="50" style=""/>
+		</div>
+		
+		<div class="easy-modal" id="checkTakeoff">
+			<div align="center">Are you sure to takeoff?</div>
+			<div align="center"><button onclick="takeoff();$('#checkTakeoff').trigger('closeModal');">確定</button>&nbsp;&nbsp;<button onclick="$('#checkTakeoff').trigger('closeModal');">取消</button></div>
+		</div>
+		
+		<div class="easy-modal" id="checkLand">
+			<div align="center">Are you sure to land?</div>
+			<div align="center"><button onclick="land();$('#checkLand').trigger('closeModal');">確定</button>&nbsp;&nbsp;<button onclick="$('#checkLand').trigger('closeModal');">取消</button></div>
+		</div>
+		
+		<div class="easy-modal" id="message">
+			<div align="center" id="message_content"></div>
+			<div align="center"><button onclick="$('#message').trigger('closeModal');">確定</button></div>
+		</div>
+	</div>
+	<div id="debugContainer" class="myContainer">	
+		<!--Remove below <!-- and -->
+		<!--to enable test buttons and debug info-->
+		<button onclick="stopInAir();">停止動作</button>&nbsp;&nbsp;
+		<button onclick="$('#checkTakeoff').trigger('openModal');">起飛</button>&nbsp;&nbsp;
+		<button onclick="$('#checkLand').trigger('openModal');">降落</button>&nbsp;&nbsp;
+		<button onclick="moveUp(0.1);">上</button>&nbsp;&nbsp;
+		<button onclick="moveDown(0.1);">下</button>&nbsp;&nbsp;
+		<button onclick="moveLeft(0.1);">左</button>&nbsp;&nbsp;
+		<button onclick="moveRight(0.1);">右</button>&nbsp;&nbsp;
+		<button onclick="moveFront(0.1);">前</button>&nbsp;&nbsp;
+		<button onclick="moveBack(0.1);">後</button>&nbsp;&nbsp;
+		<button onclick="rotateClockwise(0.3);">順旋</button>&nbsp;&nbsp;
+		<button onclick="rotateCounterClockwise(0.3);">逆旋</button>&nbsp;&nbsp;
+		<button onclick="fullscreen();">全螢</button>&nbsp;&nbsp;
+	
+		<div class="main">
+			<h2>Device Orientation</h2>
+			<table>
+				<tr>
+					<td>Event Supported</td>
+					<td id="doEvent"></td>
+				</tr>
+				<tr>
+					<td>Tilt Left/Right [gamma]</td>
+					<td id="doTiltLR"></td>
+				</tr>
+				<tr>
+					<td>Tilt Front/Back [beta]</td>
+					<td id="doTiltFB"></td>
+				</tr>
+				<tr>
+					<td>Direction [alpha]</td>
+					<td id="doDirection"></td>
+				</tr>
+				<tr>
+					<td>Action</td>
+					<td id="doAction"></td>
+				</tr>
+				<tr>
+					<td>DirOffset</td>
+					<td id="dirOffset"></td>
+				</tr>
+				<tr>
+					<td>Time</td>
+					<td id="doTime"></td>
+				</tr>
+			</table>
+			<div class="container" style="-webkit-perspective: 300; perspective: 300;">
+				<img src="html5_logo.png" id="imgLogo" class="logo">
+			</div>
+		</div>
+	</div>
 </body>
+<script type="text/javascript" charset="utf-8">
+	$( document ).ready( function() {
+		initDroneCtrl();
+		initCardBoardSensor();
+		initFullScreen();
+	});
+</script>
 </html>
